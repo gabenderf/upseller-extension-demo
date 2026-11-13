@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulador Checkout UpSeller</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+      padding: 30px;
+    }
+    h1 {
+      font-size: 22px;
+      color: #1a1a1a;
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #f0f2f5;
+      padding-bottom: 15px;
+    }
+    .input-section {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    input:focus {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+      outline: none;
+    }
+    button.btn-search {
+      padding: 12px 24px;
+      background-color: #e6f7ff;
+      border: 1px solid #91d5ff;
+      color: #1890ff;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button.btn-search:hover {
+      background-color: #bae7ff;
+    }
+    
+    .scan-grid {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .scan-card {
+      flex: 1;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      background: white;
+      padding: 20px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+    }
+    .scan-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 8px;
+    }
+    .empty-message {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+      margin: auto 0;
+    }
+    
+    .info-row {
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .info-row strong {
+      color: #666;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    th {
+      background-color: #fafafa;
+      color: #555;
+      font-weight: 600;
+    }
+    
+    /* SKU specific */
+    .sku-cell-content {
+      display: flex;
+      align-items: center;
+    }
+    .sku-img {
+      width: 40px;
+      height: 40px;
+      background-color: #e8e8e8;
+      border-radius: 4px;
+      margin-right: 12px;
+      background-image: linear-gradient(45deg, #ddd 25%, transparent 25%), linear-gradient(-45deg, #ddd 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ddd 75%), linear-gradient(-45deg, transparent 75%, #ddd 75%);
+      background-size: 10px 10px;
+    }
+    .sku-details {
+      display: flex;
+      flex-direction: column;
+    }
+    .sku-name {
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    .sku-sub {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      border: 1px solid #d9d9d9;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .qty-btn:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    .qty-val {
+      width: 35px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .status-check {
+      color: #52c41a;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .status-pending {
+      color: #faad14;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .btn-confirm-sep {
+      margin-top: auto;
+      padding: 10px 16px;
+      background-color: #52c41a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+      align-self: flex-end;
+    }
+    .btn-confirm-sep:hover {
+      background-color: #73d13d;
+    }
+    .btn-confirm-sep:disabled {
+      background-color: #d9d9d9;
+      cursor: not-allowed;
+    }
+    
+    .escaneado-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 15px;
+    }
+    .escaneado-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+    .escaneado-count {
+      color: #52c41a;
+      font-weight: bold;
+    }
+    button.btn-submit {
+      padding: 10px 24px;
+      background-color: #1890ff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    button.btn-submit:hover {
+      background-color: #40a9ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Checkout de Pedido (Simulador UpSeller)</h1>
+    
+    <div class="input-section">
+      <input type="text" id="barcode-input" placeholder="Escanear Nº de Rastreio / Código de Barras (Pressione Enter para carregar o pedido)">
+      <button class="btn-search" id="btn-buscar">Buscar</button>
+    </div>
+
+    <div class="scan-grid">
+      <!-- Painel Esquerda: Escanear Atual -->
+      <div class="scan-card">
+        <div class="scan-title">Escanear Atual</div>
+        <div class="empty-message" id="current-scan-placeholder">Nenhum Registro de Escaneio</div>
+        <div id="current-scan-info" style="display: none; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+          <div class="info-row"><strong>Nº de Rastreio:</strong> <span id="info-tracking">--</span></div>
+          <div class="info-row"><strong>Nº de Pedido:</strong> <span id="info-pedido">--</span></div>
+          <div class="info-row"><strong>Método de Envio:</strong> <span id="info-metodo">Shopee Xpress</span></div>
+        </div>
+      </div>
+      
+      <!-- Painel Direita: Tabela de SKUs do Pedido Ativo -->
+      <div class="scan-card">
+        <div class="scan-title">Produtos / SKU</div>
+        <div class="empty-message" id="sku-placeholder">Nenhum SKU Carregado</div>
+        <div id="sku-info" style="display: none; height: 100%; display: flex; flex-direction: column;">
+          <table id="sku-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Total</th>
+                <th>Verificado</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="sku-table-body">
+              <!-- Linhas inseridas dinamicamente -->
+            </tbody>
+          </table>
+          <button class="btn-confirm-sep" id="btn-confirmar-separacao" disabled>Confirmar Separação</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="escaneado-header">
+        <div class="escaneado-title" id="escaneado-header-text">Já Escaneado: -</div>
+        <button class="btn-submit" id="btn-enviar-checkout">Enviar</button>
+      </div>
+
+      <table id="checkout-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nº de Rastreio</th>
+            <th>Método de Envio</th>
+            <th>Nº de Pedido</th>
+            <th>Total</th>
+            <th>Estado da Etiqueta</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr id="empty-table-row">
+            <td colspan="6" class="empty-message" style="text-align: center;">Nenhum pedido escaneado ainda.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const barcodeInput = document.getElementById('barcode-input');
+    const btnBuscar = document.getElementById('btn-buscar');
+    
+    const currentScanPlaceholder = document.getElementById('current-scan-placeholder');
+    const currentScanInfo = document.getElementById('current-scan-info');
+    const infoTracking = document.getElementById('info-tracking');
+    const infoPedido = document.getElementById('info-pedido');
+    const infoMetodo = document.getElementById('info-metodo');
+    
+    const skuPlaceholder = document.getElementById('sku-placeholder');
+    const skuInfo = document.getElementById('sku-info');
+    const skuTableBody = document.getElementById('sku-table-body');
+    const btnConfirmarSeparacao = document.getElementById('btn-confirmar-separacao');
+    
+    const tableBody = document.getElementById('table-body');
+    const emptyTableRow = document.getElementById('empty-table-row');
+    const escaneadoHeaderText = document.getElementById('escaneado-header-text');
+    const btnEnviar = document.getElementById('btn-enviar-checkout');
+
+    let scannedOrders = [];
+    let activeOrder = null;
+
+    // Lista de SKUs fictícios para simulação baseados no código de barras
+    const MOCK_SKUS = [
+      { sku: "5X-LEN-COM-TNT", sub: "50 UNIDADES", total: 1 },
+      { sku: "KIT-MEIA-ALGODAO", sub: "3 PARES - PRETO", total: 2 },
+      { sku: "SUPORTE-CEL-MESA", sub: "ALUMINIO AJUSTAVEL", total: 1 }
+    ];
+
+    barcodeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        loadOrder();
+      }
+    });
+
+    btnBuscar.addEventListener('click', loadOrder);
+
+    function loadOrder() {
+      const val = barcodeInput.value.trim();
+      if (!val) return;
+
+      // Gerar um pedido ativo na simulação
+      const randomId = 'UP' + Math.floor(100000 + Math.random() * 900000);
+      const isShopee = val.startsWith('BR');
+      const metodo = isShopee ? 'Shopee Xpress' : 'Mercado Envios';
+      
+      // Escolher de 1 a 2 SKUs aleatórios
+      const numSkus = Math.floor(Math.random() * 2) + 1;
+      const skus = [];
+      const usedIndices = new Set();
+      
+      while (skus.length < Math.min(numSkus, MOCK_SKUS.length)) {
+        const idx = Math.floor(Math.random() * MOCK_SKUS.length);
+        if (!usedIndices.has(idx)) {
+          usedIndices.add(idx);
+          skus.push({ ...MOCK_SKUS[idx], verified: 0 });
+        }
+      }
+
+      activeOrder = {
+        tracking: val,
+        orderId: randomId,
+        method: metodo,
+        skus: skus
+      };
+
+      barcodeInput.value = '';
+      renderActiveOrder();
+    }
+
+    function renderActiveOrder() {
+      if (!activeOrder) {
+        currentScanPlaceholder.style.display = 'block';
+        currentScanInfo.style.display = 'none';
+        skuPlaceholder.style.display = 'block';
+        skuInfo.style.display = 'none';
+        return;
+      }
+
+      // Painel Esquerdo: Info
+      infoTracking.innerText = activeOrder.tracking;
+      infoPedido.innerText = activeOrder.orderId;
+      infoMetodo.innerText = activeOrder.method;
+      
+      currentScanPlaceholder.style.display = 'none';
+      currentScanInfo.style.display = 'flex';
+
+      // Painel Direita: SKU Table
+      skuTableBody.innerHTML = '';
+      activeOrder.skus.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>
+            <div class="sku-cell-content">
+              <div class="sku-img"></div>
+              <div class="sku-details">
+                <span class="sku-name">${item.sku}</span>
+                <span class="sku-sub">${item.sub}</span>
+              </div>
+            </div>
+          </td>
+          <td><strong>x ${item.total}</strong></td>
+          <td>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+              <span class="qty-val" id="qty-val-${index}">${item.verified}</span>
+              <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+            </div>
+          </td>
+          <td id="status-col-${index}">
+            <span class="status-pending">🕒</span>
+          </td>
+        `;
+        skuTableBody.appendChild(row);
+      });
+
+      skuPlaceholder.style.display = 'none';
+      skuInfo.style.display = 'flex';
+      
+      checkVerificationStatus();
+    }
+
+    // Função global para atualizar quantidade de itens via botões
+    window.updateQty = function(index, delta) {
+      if (!activeOrder || !activeOrder.skus[index]) return;
+      
+      const item = activeOrder.skus[index];
+      const newQty = Math.max(0, Math.min(item.total + 5, item.verified + delta));
+      item.verified = newQty;
+      
+      document.getElementById(`qty-val-${index}`).innerText = newQty;
+      
+      const statusCol = document.getElementById(`status-col-${index}`);
+      if (item.verified === item.total) {
+        statusCol.innerHTML = '<span class="status-check">✔️</span>';
+      } else {
+        statusCol.innerHTML = '<span class="status-pending">🕒</span>';
+      }
+      
+      checkVerificationStatus();
+    };
+
+    function checkVerificationStatus() {
+      if (!activeOrder) return;
+      
+      // Habilitar botão confirmar se todos os itens baterem a meta
+      const allVerified = activeOrder.skus.every(item => item.verified === item.total);
+      btnConfirmarSeparacao.disabled = !allVerified;
+    }
+
+    // Ao confirmar a separação, o pedido vai para "Já Escaneado"
+    btnConfirmarSeparacao.addEventListener('click', () => {
+      if (!activeOrder) return;
+
+      scannedOrders.push({
+        tracking: activeOrder.tracking,
+        method: activeOrder.method,
+        orderId: activeOrder.orderId,
+        total: activeOrder.skus.reduce((sum, item) => sum + item.total, 0)
+      });
+
+      activeOrder = null;
+      renderActiveOrder();
+      renderScannedTable();
+    });
+
+    function renderScannedTable() {
+      if (scannedOrders.length === 0) {
+        tableBody.innerHTML = '';
+        tableBody.appendChild(emptyTableRow);
+        escaneadoHeaderText.innerHTML = 'Já Escaneado: -';
+      } else {
+        tableBody.innerHTML = '';
+        scannedOrders.forEach((item, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.tracking}</td>
+            <td>${item.method}</td>
+            <td>${item.orderId}</td>
+            <td>${item.total}</td>
+            <td>🟢 Impresso</td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+        escaneadoHeaderText.innerHTML = `Já Escaneado: <span class="escaneado-count">${scannedOrders.length}</span>`;
+      }
+    }
+
+    // Botão Enviar
+    btnEnviar.addEventListener('click', () => {
+      if (scannedOrders.length === 0) {
+        alert('Nenhum pedido para enviar!');
+        return;
+      }
+      
+      console.log('Enviando pedidos:', scannedOrders);
+      
+      // Simular que o UpSeller processa e limpa a tela após um pequeno delay
+      setTimeout(() => {
+        scannedOrders = [];
+        renderScannedTable();
+        console.log('Tabela limpa pelo ERP.');
+      }, 300);
+    });
+  </script>
+</body>
+</html>

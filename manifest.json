@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "UpSeller Produtividade & Checkout",
+  "version": "1.2.0",
+  "description": "Monitoramento de produtividade e gamificação de checkout integrados com Supabase no ERP UpSeller.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "*://*.upseller.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.upseller.com/*"
+      ],
+      "js": [
+        "plugin-stub.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://*.upseller.com/*",
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ],
+      "js": [
+        "config.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Produtividade UpSeller"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["logo-hope-white.svg"],
+      "matches": [
+        "*://*.upseller.com/*",
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ]
+    }
+  ]
+}
